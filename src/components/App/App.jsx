@@ -3,6 +3,7 @@ import { Container } from './App.styled';
 import { Section } from '../Section';
 import { FeedbackOptions } from '../FeedbackOptions';
 import { Statistics } from '../Statistics';
+import { Notification } from '../Notification';
 
 export function App() {
   const [good, setGood] = useState(0);
@@ -15,32 +16,26 @@ export function App() {
   const feedbackState = feedback => {
     switch (feedback) {
       case 'good':
-        setGood(good + 1);
+        setGood(prevGood => prevGood + 1);
         break;
       case 'neutral':
-        setNeutral(neutral + 1);
+        setNeutral(prevNeutral => prevNeutral + 1);
         break;
       case 'bad':
-        setBad(bad + 1);
+        setBad(prevBad => prevBad + 1);
         break;
       default:
         return;
     }
   };
   const countTotalFeedback = () => {
-    let total = 0;
-    total = good + neutral + bad;
-
-    return total;
+    return good + neutral + bad;
   };
+
+  const total = countTotalFeedback();
+
   const countPositiveFeedbackPercentage = () => {
-    let percentage = 0;
-    let negative = neutral + bad;
-    if (negative > 0) {
-      percentage = Math.round((good / (good + neutral + bad)) * 100);
-      return percentage;
-    }
-    return (percentage = 100);
+    return Math.round((good / total) * 100);
   };
 
   return (
@@ -49,13 +44,16 @@ export function App() {
         <FeedbackOptions options={options} onLeaveFeedback={feedbackState} />
       </Section>
       <Section title="Statistics">
-        <Statistics
-          good={good}
-          neutral={neutral}
-          bad={bad}
-          total={countTotalFeedback()}
-          positivePercentage={countPositiveFeedbackPercentage()}
-        />
+        {total > 0 && (
+          <Statistics
+            good={good}
+            neutral={neutral}
+            bad={bad}
+            total={countTotalFeedback()}
+            positivePercentage={countPositiveFeedbackPercentage()}
+          />
+        )}
+        {total === 0 && <Notification text="There is no feedback" />}
       </Section>
     </Container>
   );
